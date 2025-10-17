@@ -37,8 +37,9 @@ if cf_bm:
     _scraper.cookies.set("__cf_bm", cf_bm)
 
 _CONCURRENCY = asyncio.Semaphore(1)  # 降低并发，一次只请求1个
-_TTL         = 30          # seconds
+_TTL         = 60          # seconds - 增加缓存时间到60秒
 _CACHE: dict[str, tuple[float, dict]] = {}   # key → (timestamp, data)
+_REQUEST_DELAY = 3  # 每个请求之间延迟3秒
 
 
 def _key(url: str, params: dict | None) -> str:
@@ -48,7 +49,7 @@ def _key(url: str, params: dict | None) -> str:
     return f"{url}?{p}"
 
 
-async def _fetch(url: str, *, params: dict | None = None, fresh=False) -> dict | None:
+async def _fetch(url: str, *, params: dict | None = None, fresh=False, delay=True) -> dict | None:
     """Return `payload["data"]` or None.  403 => solve Cloudflare once."""
     cache_k = _key(url, params)
     now     = time.time()
@@ -57,6 +58,10 @@ async def _fetch(url: str, *, params: dict | None = None, fresh=False) -> dict |
         ts, data = _CACHE[cache_k]
         if now - ts < _TTL:
             return data
+
+    # 请求前延迟，避免频率限制
+    if delay:
+        await asyncio.sleep(_REQUEST_DELAY)
 
     async with _CONCURRENCY:
         for attempt in (1, 2, 3):

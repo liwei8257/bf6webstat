@@ -235,8 +235,12 @@ async def search_and_fetch_player(client: TrnClient, username: str, platform: st
         }
 
 
-async def fetch_all_players_data():
-    """获取所有配置玩家的数据"""
+async def fetch_all_players_data(progress_callback=None):
+    """获取所有配置玩家的数据
+    
+    Args:
+        progress_callback: 可选的进度回调函数，接收 (current, total, player_name) 参数
+    """
     config = load_players_config()
     
     if config['type'] == 'empty':
@@ -250,18 +254,26 @@ async def fetch_all_players_data():
             # 通过用户名搜索模式
             usernames = config['usernames']
             platform = config['platform']
-            log.info(f"开始搜索 {len(usernames)} 名玩家...")
+            total = len(usernames)
+            log.info(f"开始搜索 {total} 名玩家...")
             
-            tasks = [search_and_fetch_player(client, username, platform) for username in usernames]
-            results = await asyncio.gather(*tasks)
+            for idx, username in enumerate(usernames, 1):
+                if progress_callback:
+                    await progress_callback(idx, total, username)
+                result = await search_and_fetch_player(client, username, platform)
+                results.append(result)
             
         elif config['type'] == 'players':
             # 传统配置模式
             players = config['players']
-            log.info(f"开始获取 {len(players)} 名玩家的数据...")
+            total = len(players)
+            log.info(f"开始获取 {total} 名玩家的数据...")
             
-            tasks = [fetch_player_stats(client, player) for player in players]
-            results = await asyncio.gather(*tasks)
+            for idx, player in enumerate(players, 1):
+                if progress_callback:
+                    await progress_callback(idx, total, player.get('name', f"玩家{idx}"))
+                result = await fetch_player_stats(client, player)
+                results.append(result)
     
     success_count = sum(1 for r in results if 'error' not in r)
     log.info(f"完成！成功: {success_count}/{len(results)}")

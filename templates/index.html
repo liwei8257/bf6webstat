@@ -28,6 +28,18 @@
             </div>
         </div>
 
+        <!-- 进度条 -->
+        <div id="progressContainer" class="progress-container" style="display: none;">
+            <div class="progress-header">
+                <span id="progressText">正在获取数据...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="progressDetail" class="progress-detail"></div>
+        </div>
+
         <div id="errorMessage" class="error-message" style="display: none;"></div>
 
         <div class="table-container">
@@ -86,24 +98,63 @@
             const btnText = document.getElementById('btnText');
             const btnLoading = document.getElementById('btnLoading');
             const errorMsg = document.getElementById('errorMessage');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressDetail = document.getElementById('progressDetail');
 
             btn.disabled = true;
             btnText.style.display = 'none';
             btnLoading.style.display = 'inline-flex';
             errorMsg.style.display = 'none';
 
+            // 显示进度条
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = '正在获取数据...';
+            progressPercent.textContent = '0%';
+            progressDetail.textContent = '准备中...';
+
             try {
+                // 模拟进度（因为后端返回是一次性的）
+                let fakeProgress = 0;
+                const progressInterval = setInterval(() => {
+                    if (fakeProgress < 90) {
+                        fakeProgress += Math.random() * 10;
+                        if (fakeProgress > 90) fakeProgress = 90;
+                        progressFill.style.width = fakeProgress + '%';
+                        progressPercent.textContent = Math.round(fakeProgress) + '%';
+                        progressDetail.textContent = '正在获取玩家数据...';
+                    }
+                }, 500);
+
                 const response = await fetch('/api/players');
                 const result = await response.json();
 
+                clearInterval(progressInterval);
+
                 if (result.success) {
+                    // 完成进度
+                    progressFill.style.width = '100%';
+                    progressPercent.textContent = '100%';
+                    progressDetail.textContent = `成功获取 ${result.data.length} 名玩家数据`;
+
                     playersData = result.data;
                     renderTable(playersData);
                     updateInfo();
+
+                    // 2秒后隐藏进度条
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                    }, 2000);
                 } else {
+                    clearInterval(progressInterval);
+                    progressContainer.style.display = 'none';
                     showError('获取数据失败: ' + result.error);
                 }
             } catch (error) {
+                progressContainer.style.display = 'none';
                 showError('网络错误: ' + error.message);
             } finally {
                 btn.disabled = false;
