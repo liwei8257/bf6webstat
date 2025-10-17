@@ -11,13 +11,30 @@ from urllib.parse import quote
 log         = logging.getLogger("bf6bot.trn")
 BASE        = "https://api.tracker.gg/api/v2/bf6/standard"
 TRN_API_KEY = os.getenv("TRN_API_KEY", "")
-HEADERS     = {"TRN-Api-Key": TRN_API_KEY}
+
+# 构建更完整的请求头
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Origin": "https://tracker.gg",
+    "Referer": "https://tracker.gg/",
+}
+
+if TRN_API_KEY:
+    HEADERS["TRN-Api-Key"] = TRN_API_KEY
 
 _scraper = cloudscraper.create_scraper(
     browser={"browser": "chrome", "platform": "windows", "desktop": True}
 )
-_scraper.cookies.set("cf_clearance", os.getenv("CF_CLEARANCE", ""))
-_scraper.cookies.set("__cf_bm",      os.getenv("CF_BM",       ""))
+
+# 如果有Cloudflare cookies，添加它们
+cf_clearance = os.getenv("CF_CLEARANCE", "")
+cf_bm = os.getenv("CF_BM", "")
+if cf_clearance:
+    _scraper.cookies.set("cf_clearance", cf_clearance)
+if cf_bm:
+    _scraper.cookies.set("__cf_bm", cf_bm)
 
 _CONCURRENCY = asyncio.Semaphore(4)
 _TTL         = 30          # seconds
@@ -42,19 +59,23 @@ async def _fetch(url: str, *, params: dict | None = None, fresh=False) -> dict |
             return data
 
     async with _CONCURRENCY:
-        for attempt in (1, 2):
+        for attempt in (1, 2, 3):
             try:
-                r = _scraper.get(url, params=params, headers=HEADERS, timeout=15)
-                if r.status_code == 403 and attempt == 1:
-                    log.warning("[TRN] 403 → solving CF challenge %s", url)
-                    _scraper.solve_cloudflare(url)
-                    continue
+                r = _scraper.get(url, params=params, headers=HEADERS, timeout=20)
                 r.raise_for_status()
                 data = r.json()["data"]
                 _CACHE[cache_k] = (now, data)
                 return data
+            except requests.HTTPError as e:
+                if e.response.status_code == 403:
+                    log.warning("[TRN] 403 Cloudflare block (attempt %s/3) - %s", attempt, url)
+                    if attempt < 3:
+                        import time
+                        time.sleep(2)  # 等待2秒后重试
+                        continue
+                log.warning("[TRN] HTTP Error %s (attempt %s/3)", e, attempt)
             except requests.RequestException as e:
-                log.warning("[TRN] %s (attempt %s/2)", e, attempt)
+                log.warning("[TRN] %s (attempt %s/3)", e, attempt)
         return None
     
 async def _normalise_search(data: dict | list) -> list[dict]:

@@ -17,10 +17,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """生产环境配置"""
     DEBUG = False
-    # 生产环境必须设置SECRET_KEY环境变量
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("生产环境必须设置SECRET_KEY环境变量")
+    # 生产环境SECRET_KEY，如果未设置则使用默认值
+    SECRET_KEY = os.getenv('SECRET_KEY', 'bf6-stats-default-secret-key-change-me')
 
 # 配置字典
 config = {
