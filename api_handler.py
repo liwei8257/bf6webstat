@@ -70,8 +70,7 @@ async def _fetch(url: str, *, params: dict | None = None, fresh=False) -> dict |
                 if e.response.status_code == 403:
                     log.warning("[TRN] 403 Cloudflare block (attempt %s/3) - %s", attempt, url)
                     if attempt < 3:
-                        import time
-                        time.sleep(2)  # 等待2秒后重试
+                        await asyncio.sleep(2)  # 等待2秒后重试（使用async sleep）
                         continue
                 log.warning("[TRN] HTTP Error %s (attempt %s/3)", e, attempt)
             except requests.RequestException as e:
