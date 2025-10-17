@@ -1,8 +1,20 @@
 {
-    "steam_usernames": [
-        "石景山AT人",
-        "steamforluna",
-        "Ammo117-Orz"
+    "players": [
+        {
+            "name": "石景山AT人",
+            "platform": "steam",
+            "user_id": "3116588130"
+        },
+        {
+            "name": "steamforluna",
+            "platform": "steam",
+            "user_id": "2781211646"
+        },
+        {
+            "name": "Ammo117-Orz",
+            "platform": "steam",
+            "user_id": "3220355875"
+        }
     ],
-    "note": "直接填写Steam用户名即可，程序会自动搜索并获取数据"
+    "note": "使用完整配置跳过搜索API，直接获取数据"
 }
