@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BF6 玩家数据统计</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Battlefield 6 玩家数据统计</h1>
+            <p class="subtitle">实时查询和对比玩家战绩</p>
+        </header>
+
+        <div class="controls">
+            <button id="refreshBtn" class="btn btn-primary">
+                <span id="btnText">🔄 刷新数据</span>
+                <span id="btnLoading" class="loading" style="display: none;">
+                    <span class="spinner"></span> 加载中...
+                </span>
+            </button>
+            <div class="info">
+                <span id="updateTime">-</span>
+                <span id="playerCount">玩家数: 0</span>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <div class="table-container">
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th data-sort="name">玩家名称 <span class="sort-indicator"></span></th>
+                        <th data-sort="platform">平台 <span class="sort-indicator"></span></th>
+                        <th data-sort="kills" class="sortable">击杀 <span class="sort-indicator"></span></th>
+                        <th data-sort="deaths" class="sortable">死亡 <span class="sort-indicator"></span></th>
+                        <th data-sort="kd_ratio" class="sortable">K/D <span class="sort-indicator"></span></th>
+                        <th data-sort="wins" class="sortable">胜场 <span class="sort-indicator"></span></th>
+                        <th data-sort="win_rate" class="sortable">胜率% <span class="sort-indicator"></span></th>
+                        <th data-sort="score_per_minute" class="sortable">分钟得分 <span class="sort-indicator"></span></th>
+                        <th data-sort="kills_per_minute" class="sortable">分钟击杀 <span class="sort-indicator"></span></th>
+                        <th data-sort="accuracy" class="sortable">准确率% <span class="sort-indicator"></span></th>
+                        <th data-sort="headshot_percentage" class="sortable">爆头率% <span class="sort-indicator"></span>
+                        </th>
+                        <th data-sort="matches_played" class="sortable">比赛场数 <span class="sort-indicator"></span></th>
+                        <th data-sort="time_played" class="sortable">游戏时长(h) <span class="sort-indicator"></span></th>
+                    </tr>
+                </thead>
+                <tbody id="statsBody">
+                    <tr>
+                        <td colspan="13" class="loading-cell">
+                            <div class="loading-text">点击"刷新数据"按钮加载玩家统计...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>数据来源: <a href="https://tracker.gg" target="_blank">tracker.gg</a></p>
+            <p>缓存时间: 30秒 | 自动刷新功能开发中</p>
+        </footer>
+    </div>
+
+    <script>
+        let playersData = [];
+        let currentSort = { column: null, ascending: true };
+
+        // 页面加载时自动获取数据
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchPlayersData();
+        });
+
+        // 刷新按钮事件
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            fetchPlayersData();
+        });
+
+        // 获取玩家数据
+        async function fetchPlayersData() {
+            const btn = document.getElementById('refreshBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            const errorMsg = document.getElementById('errorMessage');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-flex';
+            errorMsg.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/players');
+                const result = await response.json();
+
+                if (result.success) {
+                    playersData = result.data;
+                    renderTable(playersData);
+                    updateInfo();
+                } else {
+                    showError('获取数据失败: ' + result.error);
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const tbody = document.getElementById('statsBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" class="loading-cell">暂无数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map((player, index) => {
+                if (player.error) {
+                    return `
+                        <tr class="error-row">
+                            <td>${escapeHtml(player.name)}</td>
+                            <td>${escapeHtml(player.platform)}</td>
+                            <td colspan="11" class="error-cell">❌ ${escapeHtml(player.error)}</td>
+                        </tr>
+                    `;
+                }
+
+                const timePlayedHours = (player.time_played / 3600).toFixed(1);
+
+                return `
+                    <tr>
+                        <td class="player-name">${escapeHtml(player.name)}</td>
+                        <td>${escapeHtml(player.platform)}</td>
+                        <td>${formatNumber(player.kills)}</td>
+                        <td>${formatNumber(player.deaths)}</td>
+                        <td class="highlight">${formatDecimal(player.kd_ratio, 2)}</td>
+                        <td>${formatNumber(player.wins)}</td>
+                        <td class="highlight">${formatDecimal(player.win_rate, 1)}%</td>
+                        <td>${formatDecimal(player.score_per_minute, 0)}</td>
+                        <td>${formatDecimal(player.kills_per_minute, 2)}</td>
+                        <td>${formatDecimal(player.accuracy, 1)}%</td>
+                        <td>${formatDecimal(player.headshot_percentage, 1)}%</td>
+                        <td>${formatNumber(player.matches_played)}</td>
+                        <td>${timePlayedHours}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 排序功能
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const column = th.dataset.sort;
+                sortTable(column);
+            });
+        });
+
+        function sortTable(column) {
+            // 如果点击相同列，则切换排序方向
+            if (currentSort.column === column) {
+                currentSort.ascending = !currentSort.ascending;
+            } else {
+                currentSort.column = column;
+                currentSort.ascending = false; // 默认降序（大到小）
+            }
+
+            // 更新排序指示器
+            document.querySelectorAll('.sort-indicator').forEach(el => {
+                el.textContent = '';
+            });
+            const indicator = document.querySelector(`th[data-sort="${column}"] .sort-indicator`);
+            indicator.textContent = currentSort.ascending ? ' ▲' : ' ▼';
+
+            // 排序数据
+            const sorted = [...playersData].sort((a, b) => {
+                // 处理错误行
+                if (a.error && !b.error) return 1;
+                if (!a.error && b.error) return -1;
+                if (a.error && b.error) return 0;
+
+                let valA = a[column];
+                let valB = b[column];
+
+                // 字符串排序
+                if (typeof valA === 'string') {
+                    return currentSort.ascending
+                        ? valA.localeCompare(valB)
+                        : valB.localeCompare(valA);
+                }
+
+                // 数值排序
+                valA = parseFloat(valA) || 0;
+                valB = parseFloat(valB) || 0;
+
+                return currentSort.ascending ? valA - valB : valB - valA;
+            });
+
+            renderTable(sorted);
+        }
+
+        // 更新信息
+        function updateInfo() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-CN');
+            document.getElementById('updateTime').textContent = `最后更新: ${timeStr}`;
+            document.getElementById('playerCount').textContent = `玩家数: ${playersData.length}`;
+        }
+
+        // 显示错误
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+        }
+
+        // 工具函数
+        function formatNumber(num) {
+            return num ? num.toLocaleString('zh-CN') : '0';
+        }
+
+        function formatDecimal(num, decimals) {
+            return num ? parseFloat(num).toFixed(decimals) : '0';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>

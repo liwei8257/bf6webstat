@@ -1,0 +1,318 @@
+/* BF6 玩家数据统计 - 样式表 */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --bg-dark: #1f2937;
+    --bg-light: #f9fafb;
+    --text-dark: #111827;
+    --text-light: #6b7280;
+    --border-color: #e5e7eb;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text-dark);
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+/* 头部 */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* 控制面板 */
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: var(--bg-light);
+    border-bottom: 2px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.info {
+    display: flex;
+    gap: 20px;
+    font-size: 0.95rem;
+    color: var(--text-light);
+}
+
+.info span {
+    font-weight: 500;
+}
+
+/* 错误消息 */
+.error-message {
+    margin: 20px 40px;
+    padding: 15px 20px;
+    background: #fee2e2;
+    border-left: 4px solid var(--danger-color);
+    color: #991b1b;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* 表格容器 */
+.table-container {
+    overflow-x: auto;
+    padding: 20px 40px 40px;
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+thead {
+    background: var(--bg-dark);
+    color: white;
+}
+
+th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+}
+
+th:hover {
+    background: #374151;
+}
+
+th.sortable {
+    position: relative;
+}
+
+.sort-indicator {
+    color: var(--success-color);
+    font-size: 0.8rem;
+    margin-left: 4px;
+}
+
+td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+}
+
+tbody tr {
+    transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #f3f4f6;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 特殊单元格样式 */
+.player-name {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.highlight {
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.loading-cell {
+    text-align: center;
+    padding: 60px 20px !important;
+    color: var(--text-light);
+}
+
+.loading-text {
+    font-size: 1.1rem;
+}
+
+.error-row {
+    background: #fef2f2;
+}
+
+.error-cell {
+    color: var(--danger-color);
+    font-weight: 500;
+}
+
+/* 页脚 */
+footer {
+    background: var(--bg-light);
+    padding: 20px 40px;
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .table-container {
+        padding: 20px;
+    }
+
+    th,
+    td {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .controls {
+        padding: 15px 20px;
+    }
+
+    .info {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .table-container {
+        padding: 15px;
+    }
+
+    th,
+    td {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+}
+
+/* 滚动条美化 */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--bg-light);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--text-light);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dark);
+}

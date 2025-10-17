@@ -1,0 +1,16 @@
+# BF6 玩家数据统计系统依赖
+
+# Web框架
+Flask==3.0.0
+
+# 生产环境WSGI服务器
+gunicorn==21.2.0        # Linux生产环境
+waitress==2.1.2         # Windows生产环境
+
+# 异步HTTP请求 + Cloudflare绕过
+cloudscraper==1.2.71
+requests==2.31.0
+
+# 实用工具
+python-dotenv==1.0.0
+
