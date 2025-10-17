@@ -36,7 +36,7 @@ if cf_clearance:
 if cf_bm:
     _scraper.cookies.set("__cf_bm", cf_bm)
 
-_CONCURRENCY = asyncio.Semaphore(4)
+_CONCURRENCY = asyncio.Semaphore(1)  # 降低并发，一次只请求1个
 _TTL         = 30          # seconds
 _CACHE: dict[str, tuple[float, dict]] = {}   # key → (timestamp, data)
 
@@ -70,7 +70,7 @@ async def _fetch(url: str, *, params: dict | None = None, fresh=False) -> dict |
                 if e.response.status_code == 403:
                     log.warning("[TRN] 403 Cloudflare block (attempt %s/3) - %s", attempt, url)
                     if attempt < 3:
-                        await asyncio.sleep(2)  # 等待2秒后重试（使用async sleep）
+                        await asyncio.sleep(5)  # 等待5秒后重试，给Cloudflare更多缓冲时间
                         continue
                 log.warning("[TRN] HTTP Error %s (attempt %s/3)", e, attempt)
             except requests.RequestException as e:
