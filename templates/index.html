@@ -106,8 +106,14 @@
             fetchPlayersData();
         });
 
-        // 检测是否为生产环境（Render）
+        // 检测是否为生产环境（Render）或强制静态模式
         function isProduction() {
+            // 检查URL参数是否强制使用静态模式
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('static') === 'true') {
+                return true;
+            }
+            // 检查是否为Render域名
             return window.location.hostname.includes('onrender.com') ||
                 window.location.hostname.includes('render.com');
         }

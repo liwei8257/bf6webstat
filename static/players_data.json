@@ -1,6 +1,6 @@
 {
-  "timestamp": 1760695186,
-  "update_time": "2025-10-17 17:59:46",
+  "timestamp": 1760696357,
+  "update_time": "2025-10-17 18:19:17",
   "data": [
     {
       "name": "石景山AT人",
@@ -23,6 +23,108 @@
       "damage": 461877
     },
     {
+      "name": "aik",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "Coffeecat2501",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "RppppK",
+      "platform": "steam",
+      "user_id": "3215306747",
+      "kills": 9308,
+      "deaths": 700,
+      "kd_ratio": 13.3,
+      "wins": 92,
+      "losses": 34,
+      "win_rate": 73.02,
+      "score_per_minute": 564.27,
+      "kills_per_minute": 3.07,
+      "accuracy": 23.195004281447755,
+      "headshots": 1395,
+      "headshot_percentage": 15.5,
+      "time_played": 182079,
+      "matches_played": 126,
+      "revives": 587,
+      "damage": 1067137
+    },
+    {
+      "name": "RPG_Longbow",
+      "platform": "steam",
+      "user_id": "3146385865",
+      "kills": 2503,
+      "deaths": 991,
+      "kd_ratio": 2.53,
+      "wins": 51,
+      "losses": 38,
+      "win_rate": 57.3,
+      "score_per_minute": 360.32,
+      "kills_per_minute": 1.47,
+      "accuracy": 14.50409629731338,
+      "headshots": 321,
+      "headshot_percentage": 15.0,
+      "time_played": 102423,
+      "matches_played": 89,
+      "revives": 331,
+      "damage": 351186
+    },
+    {
+      "name": "rebycn",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "Saber50K",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "SadDarkMoon",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "Fan-Orz",
+      "platform": "steam",
+      "user_id": "3120005631",
+      "kills": 2480,
+      "deaths": 607,
+      "kd_ratio": 4.09,
+      "wins": 52,
+      "losses": 24,
+      "win_rate": 68.42,
+      "score_per_minute": 457.68,
+      "kills_per_minute": 1.75,
+      "accuracy": 18.384074941451992,
+      "headshots": 623,
+      "headshot_percentage": 25.98,
+      "time_played": 85181,
+      "matches_played": 76,
+      "revives": 513,
+      "damage": 325628
+    },
+    {
+      "name": "LaraEvora-Orz",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "AuAsama",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
       "name": "steamforluna",
       "platform": "steam",
       "user_id": "2781211646",
@@ -41,6 +143,58 @@
       "matches_played": 136,
       "revives": 554,
       "damage": 806934
+    },
+    {
+      "name": "Sgt_Sakura",
+      "platform": "steam",
+      "user_id": "3095868154",
+      "kills": 955,
+      "deaths": 321,
+      "kd_ratio": 2.98,
+      "wins": 25,
+      "losses": 20,
+      "win_rate": 55.56,
+      "score_per_minute": 343.47,
+      "kills_per_minute": 1.01,
+      "accuracy": 13.44436942006152,
+      "headshots": 115,
+      "headshot_percentage": 14.32,
+      "time_played": 56733,
+      "matches_played": 45,
+      "revives": 416,
+      "damage": 143942
+    },
+    {
+      "name": "XXXXXXXXXXXXXXk",
+      "platform": "steam",
+      "user_id": "3091088408",
+      "kills": 3838,
+      "deaths": 577,
+      "kd_ratio": 6.65,
+      "wins": 80,
+      "losses": 32,
+      "win_rate": 71.43,
+      "score_per_minute": 506.25,
+      "kills_per_minute": 1.86,
+      "accuracy": 12.532075826582295,
+      "headshots": 320,
+      "headshot_percentage": 13.79,
+      "time_played": 123668,
+      "matches_played": 112,
+      "revives": 706,
+      "damage": 750429
+    },
+    {
+      "name": "DaaaaaaaaaaaXian",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
+    },
+    {
+      "name": "skyline-yu",
+      "platform": "steam",
+      "user_id": "未找到",
+      "error": "搜索不到该玩家，请检查用户名是否正确"
     },
     {
       "name": "Ammo117-Orz",
@@ -63,5 +217,5 @@
       "damage": 426508
     }
   ],
-  "success_count": 3
+  "success_count": 8
 }

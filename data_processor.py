@@ -18,29 +18,40 @@ def load_players_config(config_file='players.json'):
     支持配置格式：
     - steam_usernames: Steam用户名列表（推荐）
     - players: 完整配置列表（兼容）
+    - 可以同时使用两种配置
     """
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
             config = json.load(f)
         
-        # 优先使用steam_usernames简化配置
+        all_players = []
+        
+        # 处理steam_usernames配置（通过用户名搜索）
         steam_usernames = config.get('steam_usernames', [])
         if steam_usernames:
-            return {
-                'type': 'usernames',
-                'usernames': steam_usernames,
-                'platform': 'steam'
-            }
+            for username in steam_usernames:
+                all_players.append({
+                    'type': 'search',
+                    'username': username,
+                    'platform': 'steam'
+                })
         
-        # 兼容原有的players配置
+        # 处理players配置（直接用ID查询）
         players = config.get('players', [])
         if players:
-            return {
-                'type': 'players',
-                'players': players
-            }
+            for player in players:
+                all_players.append({
+                    'type': 'direct',
+                    'config': player
+                })
         
-        return {'type': 'empty'}
+        if not all_players:
+            return {'type': 'empty'}
+        
+        return {
+            'type': 'mixed',
+            'players': all_players
+        }
         
     except FileNotFoundError:
         log.error(f"配置文件 {config_file} 未找到")
@@ -249,30 +260,32 @@ async def fetch_all_players_data(progress_callback=None):
     
     async with TrnClient() as client:
         results = []
+        players = config.get('players', [])
+        total = len(players)
         
-        if config['type'] == 'usernames':
-            # 通过用户名搜索模式
-            usernames = config['usernames']
-            platform = config['platform']
-            total = len(usernames)
-            log.info(f"开始搜索 {total} 名玩家...")
-            
-            for idx, username in enumerate(usernames, 1):
+        log.info(f"开始获取 {total} 名玩家的数据...")
+        
+        for idx, player in enumerate(players, 1):
+            if player['type'] == 'search':
+                # 通过用户名搜索
+                username = player['username']
+                platform = player['platform']
+                
                 if progress_callback:
                     await progress_callback(idx, total, username)
+                    
                 result = await search_and_fetch_player(client, username, platform)
                 results.append(result)
-            
-        elif config['type'] == 'players':
-            # 传统配置模式
-            players = config['players']
-            total = len(players)
-            log.info(f"开始获取 {total} 名玩家的数据...")
-            
-            for idx, player in enumerate(players, 1):
+                
+            elif player['type'] == 'direct':
+                # 直接通过ID查询
+                player_config = player['config']
+                name = player_config.get('name', f"玩家{idx}")
+                
                 if progress_callback:
-                    await progress_callback(idx, total, player.get('name', f"玩家{idx}"))
-                result = await fetch_player_stats(client, player)
+                    await progress_callback(idx, total, name)
+                    
+                result = await fetch_player_stats(client, player_config)
                 results.append(result)
     
     success_count = sum(1 for r in results if 'error' not in r)
