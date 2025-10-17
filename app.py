@@ -25,6 +25,33 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/api/players/static')
+def get_static_players_data():
+    """API端点：读取静态数据快照"""
+    try:
+        import os
+        static_file = os.path.join(app.static_folder, 'players_data.json')
+        if os.path.exists(static_file):
+            with open(static_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify({
+                'success': True,
+                'data': data['data'],
+                'timestamp': data['timestamp'],
+                'update_time': data.get('update_time', '')
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': '静态数据文件不存在'
+            }), 404
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/players')
 def get_players_data():
     """API端点：获取所有玩家数据（带进度）"""

@@ -74,8 +74,22 @@
 
         <footer>
             <p>数据来源: <a href="https://tracker.gg" target="_blank">tracker.gg</a></p>
-            <p>缓存时间: 30秒 | 自动刷新功能开发中</p>
+            <p id="footerInfo">缓存时间: 60秒 | <span id="modeInfo"></span></p>
         </footer>
+
+        <script>
+            // 在页面加载时显示模式信息
+            document.addEventListener('DOMContentLoaded', function () {
+                const modeInfo = document.getElementById('modeInfo');
+                if (isProduction()) {
+                    modeInfo.textContent = '📊 生产模式：静态数据';
+                    modeInfo.style.color = '#10b981';
+                } else {
+                    modeInfo.textContent = '🔄 开发模式：实时查询';
+                    modeInfo.style.color = '#2563eb';
+                }
+            });
+        </script>
     </div>
 
     <script>
@@ -91,6 +105,12 @@
         document.getElementById('refreshBtn').addEventListener('click', () => {
             fetchPlayersData();
         });
+
+        // 检测是否为生产环境（Render）
+        function isProduction() {
+            return window.location.hostname.includes('onrender.com') ||
+                window.location.hostname.includes('render.com');
+        }
 
         // 获取玩家数据
         async function fetchPlayersData() {
@@ -114,7 +134,13 @@
             progressFill.style.width = '0%';
             progressText.textContent = '正在获取数据...';
             progressPercent.textContent = '0%';
-            progressDetail.textContent = '准备中...';
+
+            // 根据环境选择API
+            const isStatic = isProduction();
+            const apiUrl = isStatic ? '/api/players/static' : '/api/players';
+            progressDetail.textContent = isStatic ?
+                '从静态快照读取数据...' :
+                '实时查询中...';
 
             try {
                 // 模拟进度（因为后端返回是一次性的）
@@ -125,11 +151,10 @@
                         if (fakeProgress > 90) fakeProgress = 90;
                         progressFill.style.width = fakeProgress + '%';
                         progressPercent.textContent = Math.round(fakeProgress) + '%';
-                        progressDetail.textContent = '正在获取玩家数据...';
                     }
-                }, 500);
+                }, isStatic ? 100 : 500); // 静态数据加载更快
 
-                const response = await fetch('/api/players');
+                const response = await fetch(apiUrl);
                 const result = await response.json();
 
                 clearInterval(progressInterval);
@@ -138,11 +163,16 @@
                     // 完成进度
                     progressFill.style.width = '100%';
                     progressPercent.textContent = '100%';
-                    progressDetail.textContent = `成功获取 ${result.data.length} 名玩家数据`;
+
+                    let detailText = `成功获取 ${result.data.length} 名玩家数据`;
+                    if (result.update_time) {
+                        detailText += ` (数据更新时间: ${result.update_time})`;
+                    }
+                    progressDetail.textContent = detailText;
 
                     playersData = result.data;
                     renderTable(playersData);
-                    updateInfo();
+                    updateInfo(result.update_time);
 
                     // 2秒后隐藏进度条
                     setTimeout(() => {
@@ -257,11 +287,24 @@
         }
 
         // 更新信息
-        function updateInfo() {
+        function updateInfo(dataUpdateTime) {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('zh-CN');
-            document.getElementById('updateTime').textContent = `最后更新: ${timeStr}`;
+
+            let updateText = `查询时间: ${timeStr}`;
+            if (dataUpdateTime) {
+                updateText += ` (数据: ${dataUpdateTime})`;
+            }
+
+            document.getElementById('updateTime').textContent = updateText;
             document.getElementById('playerCount').textContent = `玩家数: ${playersData.length}`;
+
+            // 显示环境提示
+            if (isProduction()) {
+                document.getElementById('updateTime').title = '生产环境：显示静态快照数据';
+            } else {
+                document.getElementById('updateTime').title = '本地环境：实时查询数据';
+            }
         }
 
         // 显示错误

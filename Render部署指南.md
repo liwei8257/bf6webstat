@@ -76,7 +76,7 @@ git push -u origin main
    pip install -r requirements.txt
    
    Start Command:
-   gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 wsgi:app
+   gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 180 --graceful-timeout 180 wsgi:app
    ```
 
 4. **选择免费计划**
